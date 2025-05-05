@@ -1,0 +1,400 @@
+INSTRUCTIVO:
+| Conectarse al servidor por SSH
+ssh tu_usuario@tu_ip_publica
+
+
+| Actualizar el sistema
+sudo apt update && sudo apt upgrade -y
+
+
+| Instalar dependencias esenciales:
+# Python 3: necesario para ejecutar scripts y programas en ese lenguaje.
+sudo apt install -y python3
+
+# pip para Python 3: el gestor de paquetes de Python. Te permite instalar bibliotecas como Django, Flask, pandas, etc.
+sudo apt install -y python3-pip
+
+# permite crear entornos virtuales de Python
+sudo apt install -y python3-venv
+
+# Git, el sistema de control de versiones. Lo necesitás para clonar repositorios, versionar código y trabajar con GitHub/GitLab, etc.
+sudo apt install -y git
+
+# curl, una herramienta de línea de comandos para hacer peticiones HTTP/HTTPS. Se usa mucho para probar APIs o descargar scripts desde Internet.
+sudo apt install -y curl
+
+# Instala un grupo de herramientas esenciales para compilar software desde código fuente
+sudo apt install -y build-essential 
+
+# pkg-config: herramienta que ayuda a compilar software, indicando cómo encontrar bibliotecas instaladas.
+# libmariadb-dev: cabeceras y archivos de desarrollo para conectar con bases de datos MariaDB/MySQL desde lenguajes como C, o desde Python/Django usando conectores nativos.
+sudo apt install -y pkg-config libmariadb-dev
+
+
+| Crear y activar entorno virtual de Python
+# RECOMENDACION: instalar entorno despues del htdocs >
+° Ejemplo : "cd /home/gestionargnea-control/htdocs/control.gestionargnea.com"
+python3 -m venv venv
+# Activar entorno:
+source venv/bin/activate	
+
+
+| Instalá Certbot para Nginx
+# Certbot: es la herramienta de Let's Encrypt para obtener certificados SSL.
+# python3-certbot-nginx: es el plugin que permite a certbot configurar automáticamente Nginx para usar SSL.
+sudo apt install certbot python3-certbot-nginx -y
+
+
+| Luego ejecutá Certbot para tu dominio
+# Sirve para obtener y configurar automáticamente un certificado SSL de Let's Encrypt para tu dominio control.gestionargnea.com, utilizando el servidor web Nginx.
+sudo certbot --nginx -d control.gestionargnea.com
+
+° Solicitara tu Correo solicitado > tu_correo@dominio_correo.com
+
+
+| Activá el sitio en Nginx:
+# Crea un enlace simbólico desde el archivo de configuración de Nginx en sites-available a la carpeta sites-enabled, lo que habilita el sitio configurado para que Nginx lo utilice.
+sudo ln -s /etc/nginx/sites-available/control.gestionargnea.com /etc/nginx/sites-enabled/
+# Verificá que Nginx esté bien configurado:
+sudo nginx -t  # Verifica errores
+# Si no hay errores, reiniciá Nginx:
+sudo systemctl restart nginx
+
+
+| Lanzá Gunicorn:
+# Gunicorn (Green Unicorn) es un servidor WSGI (Web Server Gateway Interface) para aplicaciones web Python. Es ampliamente utilizado para servir aplicaciones Python, como Django o Flask, en producción.
+pip install gunicorn
+
+# Inicia el servidor Gunicorn para servir tu aplicación Django en el puerto 8000 de la dirección local (127.0.0.1). Esto es útil para ejecutar la aplicación de manera local o para realizar pruebas en desarrollo.
+gunicorn miapp.wsgi:application --bind 127.0.0.1:8000
+
+|  Crear archivo de servicio para Gunicorn:
+# Este comando abre el archivo de configuración gunicorn.service en el editor de texto
+sudo nano /etc/systemd/system/gunicorn.service
+* Inicio *
+[Unit]
+Description=Gunicorn daemon for Django project
+After=network.target
+
+[Service]
+User=gestionargnea-control
+Group=www-data
+WorkingDirectory=/home/gestionargnea-control/htdocs/control.gestionargnea.com
+ExecStart=/home/gestionargnea-control/htdocs/control.gestionargnea.com/venv/bin/gunicorn \
+          miapp.wsgi:application \
+          --bind 127.0.0.1:8000 \
+          --workers 3
+
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
+* Fin *
+
+# Explicación rápida:
+# User: el usuario que ejecuta el servicio.
+# WorkingDirectory: ruta del proyecto Django.
+# ExecStart: ruta absoluta al Gunicorn del entorno virtual.
+# miapp.wsgi:application: reemplazá miapp por el nombre de tu carpeta Django con wsgi.py.
+# --bind 127.0.0.1:8000: Gunicorn escuchará localmente (Nginx le reenvía).
+# --workers 3: cantidad de procesos Gunicorn.
+
+| Recargar systemd y habilitar servicio:
+# Reinicia el proceso principal (PID 1) del systemd sin reiniciar el sistema.
+sudo systemctl daemon-reexec
+
+# Recarga los archivos de configuración de los servicios (por ejemplo, si creaste o modificaste un archivo .service).
+sudo systemctl daemon-reload
+
+# Configura el servicio gunicorn para que se inicie automáticamente al arrancar el sistema.
+sudo systemctl enable gunicorn
+
+# Inicia el servicio gunicorn en ese momento.
+sudo systemctl start gunicorn
+
+
+| Verificar que esté corriendo:
+# Muestra el estado actual del servicio gunicorn.
+sudo systemctl status gunicorn
+
+
+|  Verificá que gunicorn funcione:
+# Ejecuta el servidor Gunicorn apuntando a tu aplicación Django.
+gunicorn core.wsgi:application
+
+
+
+| Instalar e iniciar MariaDB
+# Instala el servidor de MariaDB.
+sudo apt install -y mariadb-server
+# Inicia el servicio de MariaDB inmediatamente.
+sudo systemctl start mariadb
+# Configura MariaDB para que se inicie automáticamente en cada arranque del sistema.
+sudo systemctl enable mariadb
+# Lanza un script interactivo para asegurar MariaDB, que te permite:
+°Establecer una contraseña para el usuario root.
+°Eliminar usuarios anónimos.
+°Deshabilitar el acceso remoto del usuario root.
+°Eliminar la base de datos de prueba.
+°Recargar los privilegios.
+sudo mysql_secure_installation
+
+| Crear base de datos y usuario para Django
+# Ejecuta el cliente de MariaDB (que es compatible con MySQL).
+sudo mariadb -u root -p
+# Ejecuta el cliente de MySQL (A menudo sigue funcionando porque MariaDB es un reemplazo directo de MySQL).
+sudo mysql -u root -p
+
+# EJEMPLO DE BASE DE DATOS:
+CREATE DATABASE nombre_basedatos CHARACTER SET UTF8MB4;
+CREATE USER 'usuario_django'@'localhost' IDENTIFIED BY 'tu_password_segura';
+GRANT ALL PRIVILEGES ON nombre_basedatos.* TO 'usuario_django'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;
+# Entrar al cliente MariaDB:
+sudo mariadb
+SHOW DATABASES;
+# Borrar una base de datos:
+DROP DATABASE nombre_de_la_base;
+# Salir:
+EXIT;
+
+
+| Acceso a cuenta GitHub:
+# Hacerlo desde el usuario que gestiona tu sitio web, por ejemplo:
+° /home/tu_usuario/htdocs
+ssh-keygen -t ed25519 -C "tu_email"
+(te la guarda en la raiz del servidor "~/.ssh/id_ed25519.pub")
+
+| Mostrar tu clave pública para copiarla:
+cat ~/.ssh/id_ed25519.pub
+# Agregar la clave pública a tu cuenta de GitHub:
+° Iniciá sesión en GitHub en tu navegador > "https://github.com/"
+° Ir a Settings > SSH and GPG keys.
+° Hacé clic en "New SSH key".
+° Pegá la clave copiada y dale un nombre.
+
+| Probar conexión desde el servidor:
+ssh -T git@github.com
+° SIGUEINTE PÁSO:
+° Escribir "yes", y generara este mensaje:
+° "Hi "NOMBRE_USUARIO_GITHUB"! You've successfully authenticated, but GitHub does not provide shell access."
+
+
+| Clonar tu repositorio Django desde GitHub:
+git clone https://github.com/tu_usuario/tu_repositorio.git
+cd tu_repositorio
+# Instalar dependencias del proyecto:
+pip install --upgrade pip
+pip install -r requirements.txt
+
+
+| Configurar .env para conectarse a la base de datos:
+# Config Django:
+SECRET_KEY= CLAVE DE DJANGO	
+DEBUG=True
+ALLOWED_HOSTS= WEB, 127.0.0.1 (EJEMPLO: control.gestionargnea.com, 127.0.0.1 )
+
+# Config data base:
+DB_NAME= NOMBRE_BD
+DB_USER= USUARIO_BD
+DB_PASSWORD= PASS_BD
+DB_HOST=localhost
+DB_PORT=3306
+
+| Configurar settings.py para conectarse a la base de datos:
+# MODIFICAR/AGREGAR:
+* incio *
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'static'
+CSRF_TRUSTED_ORIGINS = ['https://control.gestionargnea.com',]
+* Fin *
+
+| Recopilar los archivos estáticos:
+# Copia todos los archivos estáticos (CSS, JS, imágenes, fuentes, etc.) de tu proyecto Django y sus apps al directorio definido en STATIC_ROOT.
+# ALERTA:
+° Previamente debe de estar configurado "settings.py".
+° Una vez configurado, se puede ejecutar el comando:
+python manage.py collectstatic
+
+
+
+| Abrir el archivo de configuración de Nginx:
+# Abre el archivo de configuración de Nginx para el dominio control.gestionargnea.com:
+sudo nano /etc/nginx/sites-available/control.gestionargnea.com.conf
+# Agregar la configuración de archivos estáticos:
+* Inicio *
+# Redirección de HTTP a HTTPS (puerto 80)
+server {
+    listen 80;
+    listen [::]:80;
+    server_name control.gestionargnea.com;
+
+    # Redirigir todo el tráfico HTTP a HTTPS
+    return 301 https://$host$request_uri;
+}
+
+# Bloque HTTPS (puerto 443)
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    server_name control.gestionargnea.com;
+
+    # Certificados SSL
+    ssl_certificate /etc/letsencrypt/live/control.gestionargnea.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/control.gestionargnea.com/privkey.pem;
+
+    # Configuración para servir archivos estáticos
+    location /static/ {
+        alias /home/gestionargnea-control/htdocs/control.gestionargnea.com/static/;
+    }
+
+    # Proxy a Gunicorn (que está escuchando en 127.0.0.1:8000)
+    location / {
+        proxy_pass http://127.0.0.1:8000/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Otras configuraciones que puedas necesitar...
+}
+* Fin *
+
+| Reiniciar Nginx para aplicar los cambios:
+# Reinicia el servicio de Nginx completamente, deteniendo y luego volviendo a iniciar el servicio:
+sudo systemctl restart nginx
+
+
+| Recargar Nginx después de realizar cambios:
+# Recarga la configuración de Nginx sin detener el servicio, lo que significa que aplica los cambios realizados en los archivos de configuración sin interrumpir las conexiones activas:
+sudo systemctl reload nginx
+
+| Verificar si Nginx está funcionando correctamente:
+# Muestra el estado actual del servicio Nginx en tu servidor:
+sudo systemctl status nginx
+
+
+| Migrar la base de datos y correr el servidor:
+# Crea archivos de migración para reflejar los cambios realizados en los modelos (models.py) de tu proyecto Django:
+python manage.py makemigrations
+
+# Aplica las migraciones pendientes a la base de datos:
+python manage.py migrate
+
+# Crea un usuario administrador para acceder al panel de administración de Django (/admin) con todos los permisos.
+python manage.py createsuperuser
+
+# Corre el servidor: (opcional)
+python manage.py runserver
+
+
+| Configuración SSL:
+# En Vhost editar >
+* inicio *
+{{ssl_certificate_key}} > sl_certificate /etc/letsencrypt/live/control.gestionargnea.com/fullchain.pem;
+{{ssl_certificate}} > ssl_certificate_key /etc/letsencrypt/live/control.gestionargnea.com/privkey.pem;
+{{root}} > root /home/gestionargnea-control/htdocs/control.gestionargnea.com;
+
+{{nginx_access_log}} >  access_log /var/log/nginx/control_access.log;
+{{nginx_error_log}} > error_log /var/log/nginx/control_error.log;
+		
+{{settings}} > desde aca hasta abajo agregar / eliminar lo que este tambien:
+if ($scheme != "https") {
+        return 301 https://$host$request_uri;
+    }
+
+    location ~ /.well-known {
+        auth_basic off;
+        allow all;
+    }
+
+    include /etc/nginx/global_settings;
+
+    index index.html;
+
+    # RUTA PARA ARCHIVOS ESTÁTICOS
+    location /static/ {
+        alias /home/gestionargnea-control/htdocs/control.gestionargnea.com/static/;
+    }
+
+    location /uwsgi {
+        include uwsgi_params;
+        uwsgi_read_timeout 3600;
+        uwsgi_pass 127.0.0.1:8000;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:8000/;
+        proxy_http_version 1.1;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Server $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Host $host;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "Upgrade";
+        proxy_pass_request_headers on;
+        proxy_max_temp_file_size 0;
+        proxy_connect_timeout 900;
+        proxy_send_timeout 900;
+        proxy_read_timeout 900;
+        proxy_buffer_size 128k;
+        proxy_buffers 4 256k;
+        proxy_busy_buffers_size 256k;
+        proxy_temp_file_write_size 256k;
+    }
+
+    location ~* ^.+\.(css|js|jpg|jpeg|gif|png|ico|gz|svg|svgz|ttf|otf|woff|woff2|eot|mp4|ogg|ogv|webm|webp|zip|swf)$ {
+        add_header Access-Control-Allow-Origin "*";
+        add_header alt-svc 'h3=":443"; ma=86400';
+        expires max;
+        access_log on;
+    }
+
+    if (-f $request_filename) {
+        break;
+    }
+
+* Fin *
+
+| Ultimos controles: 
+# Permisos de archivos estáticos y media
+# Nginx > 
+location /static/ {
+    alias /ruta/a/tu/proyecto/static/;
+}
+location /media/ {
+    alias /ruta/a/tu/proyecto/media/;
+}
+	ingresar comando:
+		python manage.py collectstatic
+
+# Configuración ALLOWED_HOSTS en .env
+	ALLOWED_HOSTS = ["control.gestionargnea.com", "127.0.0.1"]
+	ALLOWED_HOSTS = control.gestionargnea.com, 127.0.0.1
+
+
+
+
+# Dependecias extras:
+° Gunicorn (servidor WSGI para Django): Sirve tu aplicación Django como servidor WSGI (concurrente, eficiente).
+° Nginx (servidor web para servir tu app de forma segura): Se pone delante de Gunicorn. Sirve archivos estáticos, maneja tráfico HTTPS, balanceo, seguridad.
+° Certbot (para HTTPS con Let's Encrypt): Te instala y renueva certificados HTTPS gratuitos (Let's Encrypt) automáticamente.
+° pip install python-decouple mysqlclient (mysqlclient es el adaptador recomendado para usar MariaDB/MySQL con Django.)
+
+
+# Comando utiles:
+° abrir archivo >	nano settings.py
+° instalar librería > pip install python-decouple
+° reiniciar el servidor Ubuntu > sudo reboot
+° collectstatic > python manage.py collectstatic
+
+
+
+
+
+

@@ -1,87 +1,650 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Instructivo de Configuración del Servidor</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Instructivo de Despliegue Django</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
   <style>
     body {
+      padding: 2rem;
       background-color: #f8f9fa;
     }
     pre {
-      background-color: #212529;
-      color: #f8f9fa;
+      background-color: #272822;
+      color: #f8f8f2;
       padding: 1rem;
-      border-radius: 0.5rem;
+      border-radius: .5rem;
       overflow-x: auto;
     }
-    h2 {
-      margin-top: 2rem;
+    h1 {
+      margin-bottom: 2rem;
     }
   </style>
 </head>
 <body>
-  <div class="container py-5">
-    <h1 class="mb-4 text-center">Instructivo de Configuración del Servidor</h1>
+  <div class="container">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h1 class="text-center">Instructivo de Despliegue Django + Gunicorn + Nginx</h1>
 
-    <h2>1. Conectarse al servidor por SSH</h2>
-    <pre><code>ssh tu_usuario@tu_ip_publica</code></pre>
+        <div class="accordion" id="instructivoAccordion">
+          <!-- Sección: Conectarse al servidor por SSH -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingSSH">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSSH">
+                <i class="bi bi-terminal-fill me-2"></i>Conectarse al servidor por SSH
+              </button>
+            </h2>
+            <div id="collapseSSH" class="accordion-collapse collapse" data-bs-parent="#instructivoAccordion">
+              <div class="accordion-body">
+                <p class="fw-semibold">Conexión a consola desde exterior:</p>
+                <pre><code>ssh tu_usuario@tu_ip_publica</code></pre>
+              </div>
+            </div>
+          </div>
 
-    <h2>2. Actualizar el sistema</h2>
-    <pre><code>sudo apt update &amp;&amp; sudo apt upgrade -y</code></pre>
+          <!-- Sección: Actualizar el sistema -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingsistema">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsesistema">
+                <i class="bi bi-terminal-fill me-2"></i>Actualizar el sistema
+              </button>
+            </h2>
+            <div id="collapsesistema" class="accordion-collapse collapse" data-bs-parent="#instructivoAccordion">
+              <div class="accordion-body">
+                <p class="fw-semibold">Actualiza la lista de paquetes disponibles y luego instala las actualizaciones del sistema automáticamente:</p>
+                <pre><code>sudo apt update && sudo apt upgrade -y</code></pre>
+              </div>
+            </div>
+          </div>
 
-    <h2>3. Instalar dependencias esenciales</h2>
-    <pre><code>sudo apt install -y python3 python3-pip python3-venv git curl</code></pre>
+          <!-- Sección: Instalar dependencias esenciales -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingdependencias">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsedependencias">
+                <i class="bi bi-terminal-fill me-2"></i>Instalar dependencias esenciales
+              </button>
+            </h2>
+            <div id="collapsedependencias" class="accordion-collapse collapse" data-bs-parent="#instructivoAccordion">
+              <div class="accordion-body">
+                <ul class="list-unstyled">
+                  <li class="mb-3">
+                    <p class="fw-semibold">Python 3:</p>
+                    <pre><code>sudo apt install -y python3</code></pre>
+                  </li>
+                  <li class="mb-3">
+                    <p class="fw-semibold">pip para Python 3:</p>
+                    <pre><code>sudo apt install -y python3-pip</code></pre>
+                  </li>
+                  <li class="mb-3">
+                    <p class="fw-semibold">python3-venv: permite crear entornos virtuales</p>
+                    <pre><code>sudo apt install -y python3-venv</code></pre>
+                  </li>
+                  <li class="mb-3">
+                    <p class="fw-semibold">Git: sistema de control de versiones</p>
+                    <pre><code>sudo apt install -y git</code></pre>
+                  </li>
+                  <li class="mb-3">
+                    <p class="fw-semibold">curl: herramienta para hacer peticiones HTTP</p>
+                    <pre><code>sudo apt install -y curl</code></pre>
+                  </li>
+                  <li class="mb-3">
+                    <p class="fw-semibold">build-essential: herramientas para compilar software</p>
+                    <pre><code>sudo apt install -y build-essential</code></pre>
+                  </li>
+                  <li class="mb-3">
+                    <p class="fw-semibold">pkg-config: ayuda a compilar software encontrando librerías</p>
+                    <pre><code>sudo apt install -y pkg-config</code></pre>
+                  </li>
+                  <li class="mb-3">
+                    <p class="fw-semibold">libmariadb-dev: desarrollo con MariaDB/MySQL</p>
+                    <pre><code>sudo apt install -y libmariadb-dev</code></pre>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
 
-    <h2>4. Crear y activar entorno virtual de Python</h2>
-    <pre><code>python3 -m venv venv
-source venv/bin/activate</code></pre>
+          <!-- Sección: Crear y activar entorno virtual -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingentorno">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseentorno">
+                <i class="bi bi-terminal-fill me-2"></i>Crear y activar entorno virtual de Python
+              </button>
+            </h2>
+            <div id="collapseentorno" class="accordion-collapse collapse" data-bs-parent="#instructivoAccordion">
+              <div class="accordion-body">
+                <p class="fw-semibold">Recomendación: crear el entorno virtual dentro del proyecto (por ejemplo, después de entrar a `htdocs/control.gestionargnea.com`):</p>
+                <pre><code>cd /home/gestionargnea-control/htdocs/control.gestionargnea.com</code></pre>
+                <p class="fw-semibold mt-3">Crear entorno virtual:</p>
+                <pre><code>python3 -m venv venv</code></pre>
+                <p class="fw-semibold mt-3">Activar entorno:</p>
+                <pre><code>source venv/bin/activate</code></pre>
+              </div>
+            </div>
+          </div>
 
-    <h2>5. Instalar e iniciar MariaDB</h2>
-    <pre><code>sudo apt install -y mariadb-server
-sudo systemctl start mariadb
-sudo systemctl enable mariadb
-sudo mysql_secure_installation</code></pre>
+          <!-- Sección: Instalá Certbot para Nginx -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingCertbot">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCertbot">
+                <i class="bi bi-terminal-fill me-2"></i>Instalá Certbot para Nginx
+              </button>
+            </h2>
+            <div id="collapseCertbot" class="accordion-collapse collapse" data-bs-parent="#instructivoAccordion">
+              <div class="accordion-body">
+                <p class="fw-semibold">Certbot: es la herramienta de Let's Encrypt para obtener certificados SSL.</p>
+                <p class="fw-semibold">python3-certbot-nginx: es el plugin que permite a certbot configurar automáticamente Nginx para usar SSL.</p>
+                <pre><code>sudo apt install certbot python3-certbot-nginx -y</code></pre>
+              </div>
+            </div>
+          </div>
+          <!-- Sección: ejecutá Certbot para tu dominio -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingdominio">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsedominio">
+                <i class="bi bi-terminal-fill me-2"></i>Ejecutar Certbot para tu dominio
+              </button>
+            </h2>
+            <div id="collapsedominio" class="accordion-collapse collapse" data-bs-parent="#instructivoAccordion">
+              <div class="accordion-body">
+                <p class="fw-semibold">Sirve para obtener y configurar automáticamente un certificado SSL de Let's Encrypt para tu dominio control.gestionargnea.com, utilizando el servidor web Nginx.</p>
+                <pre><code>sudo certbot --nginx -d control.gestionargnea.com</code></pre>
+                <p class="fw-semibold">Solicitara tu Correo solicitado.</p>
+                <pre><code> tu_correo@dominio_correo.com</code></pre>
+              </div>
+            </div>
+          </div>
+          <!-- Sección: Activá el sitio en Nginx -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingNginx">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseNginx">
+                <i class="bi bi-terminal-fill me-2"></i>Activá el sitio en Nginx
+              </button>
+            </h2>
+            <div id="collapseNginx" class="accordion-collapse collapse" data-bs-parent="#instructivoAccordion">
+              <div class="accordion-body">
+                <p class="fw-semibold">Crea un enlace simbólico desde el archivo de configuración de Nginx en sites-available a la carpeta sites-enabled, lo que habilita el sitio configurado para que Nginx lo utilice.</p>
+                <pre><code>sudo ln -s /etc/nginx/sites-available/control.gestionargnea.com /etc/nginx/sites-enabled/</code></pre>
+                <p class="fw-semibold">Verificá que Nginx esté bien configurado:</p>
+                <pre><code>sudo nginx -t</code></pre>
+                <p class="fw-semibold">Si no hay errores, reiniciá Nginx:</p>
+                <pre><code>sudo systemctl restart nginx</code></pre>
+              </div>
+            </div>
+          </div>
+          <!-- Sección: Lanzá Gunicorn: -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingGunicorn">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGunicorn">
+                <i class="bi bi-terminal-fill me-2"></i>Lanzá Gunicorn:
+              </button>
+            </h2>
+            <div id="collapseGunicorn" class="accordion-collapse collapse" data-bs-parent="#instructivoAccordion">
+              <div class="accordion-body">
+                <p class="fw-semibold">Gunicorn (Green Unicorn) es un servidor WSGI (Web Server Gateway Interface) para aplicaciones web Python. Es ampliamente utilizado para servir aplicaciones Python, como Django o Flask, en producción.</p>
+                <pre><code>pip install gunicorn</code></pre>
+                <p class="fw-semibold">Inicia el servidor Gunicorn para servir tu aplicación Django en el puerto 8000 de la dirección local (127.0.0.1). Esto es útil para ejecutar la aplicación de manera local o para realizar pruebas en desarrollo.</p>
+                <pre><code>gunicorn miapp.wsgi:application --bind 127.0.0.1:8000</code></pre>
+              </div>
+            </div>
+          </div>
+          <!-- Sección: Crear archivo de servicio para Gunicorn -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingCREAGunicorn">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCREAGunicorn">
+                <i class="bi bi-terminal-fill me-2"></i>Crear archivo de servicio para Gunicorn
+              </button>
+            </h2>
+            <div id="collapseCREAGunicorn" class="accordion-collapse collapse" data-bs-parent="#instructivoAccordion">
+              <div class="accordion-body">
+                <p class="fw-semibold">Este comando abre el archivo de configuración gunicorn.service en el editor de texto.</p>
+                <pre><code>sudo nano /etc/systemd/system/gunicorn.service</code></pre>
+                <p class="fw-semibold">Codigo ejemplo:</p>
+                <p class="fw-semibold">User: el usuario que ejecuta el servicio.</p>
+                <p class="fw-semibold">WorkingDirectory: ruta del proyecto Django.</p>
+                <p class="fw-semibold">ExecStart: ruta absoluta al Gunicorn del entorno virtual.</p>
+                <p class="fw-semibold">miapp.wsgi:application: reemplazá miapp por el nombre de tu carpeta Django con wsgi.py.</p>
+                <p class="fw-semibold">--bind 127.0.0.1:8000: Gunicorn escuchará localmente (Nginx le reenvía).</p>
+                <p class="fw-semibold">--workers 3: cantidad de procesos Gunicorn.</p>
+                <pre><code>
+                    [Unit]
+                    Description=Gunicorn daemon for Django project
+                    After=network.target
+                    
+                    [Service]
+                    User=gestionargnea-control
+                    Group=www-data
+                    WorkingDirectory=/home/gestionargnea-control/htdocs/control.gestionargnea.com
+                    ExecStart=/home/gestionargnea-control/htdocs/control.gestionargnea.com/venv/bin/gunicorn \
+                              miapp.wsgi:application \
+                              --bind 127.0.0.1:8000 \
+                              --workers 3
+                    
+                    Restart=always
+                    RestartSec=3
+                    
+                    [Install]
+                    WantedBy=multi-user.target</code></pre>
+              </div>
+            </div>
+          </div>
+          <!-- Sección: Recargar systemd y habilitar servicio -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingsystemd">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsesystemd">
+                <i class="bi bi-terminal-fill me-2"></i>Recargar systemd y habilitar servicio
+              </button>
+            </h2>
+            <div id="collapsesystemd" class="accordion-collapse collapse" data-bs-parent="#instructivoAccordion">
+              <div class="accordion-body">
+                <p class="fw-semibold">Reinicia el proceso principal (PID 1) del systemd sin reiniciar el sistema.</p>
+                <pre><code>sudo systemctl daemon-reexec</code></pre>
+                <p class="fw-semibold">Recarga los archivos de configuración de los servicios (por ejemplo, si creaste o modificaste un archivo .service).</p>
+                <pre><code>sudo systemctl daemon-reload</code></pre>
+                <p class="fw-semibold">Configura el servicio gunicorn para que se inicie automáticamente al arrancar el sistema.</p>
+                <pre><code>sudo systemctl enable gunicorn</code></pre>
+                <p class="fw-semibold">Inicia el servicio gunicorn en ese momento.</p>
+                <pre><code>sudo systemctl start gunicorn</code></pre>
+                <p class="fw-semibold">Muestra el estado actual del servicio gunicorn.</p>
+                <pre><code>sudo systemctl status gunicorn</code></pre>
+                <p class="fw-semibold">Ejecuta el servidor Gunicorn apuntando a tu aplicación Django.</p>
+                <pre><code>gunicorn core.wsgi:application</code></pre>
+              </div>
+            </div>
+          </div>
+          <!-- Sección:  Instalar e iniciar MariaDB -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingMariaDB">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMariaDB">
+                <i class="bi bi-terminal-fill me-2"></i>Instalar e iniciar MariaDB 
+              </button>
+            </h2>
+            <div id="collapseMariaDB" class="accordion-collapse collapse" data-bs-parent="#instructivoAccordion">
+              <div class="accordion-body">
+                <p class="fw-semibold">Instala el servidor de MariaDB.</p>
+                <pre><code>sudo apt install -y mariadb-server</code></pre>
+                <p class="fw-semibold">Inicia el servicio de MariaDB inmediatamente.</p>
+                <pre><code>sudo systemctl start mariadb</code></pre>
+                <p class="fw-semibold">Configura MariaDB para que se inicie automáticamente en cada arranque del sistema.</p>
+                <pre><code>sudo systemctl enable mariadb</code></pre>
+                <p class="fw-semibold">Lanza un script interactivo para asegurar MariaDB, que te permite:</p>
+                <pre><code>sudo mysql_secure_installation</code></pre>
+              </div>
+            </div>
+          </div>
+          <!-- Sección: Crear base de datos y usuario para Django -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingdbDjango">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsedbDjango">
+                <i class="bi bi-terminal-fill me-2"></i>Crear base de datos y usuario para Django
+              </button>
+            </h2>
+            <div id="collapsedbDjango" class="accordion-collapse collapse" data-bs-parent="#instructivoAccordion">
+              <div class="accordion-body">
+                <p class="fw-semibold">Ejecuta el cliente de MariaDB (que es compatible con MySQL).</p>
+                <pre><code>sudo mariadb -u root -p</code></pre>
+                <pre><code>sudo mariadb</code></pre>
+                <p class="fw-semibold">Ejecuta el cliente de MySQL (A menudo sigue funcionando porque MariaDB es un reemplazo directo de MySQL).</p>
+                <pre><code>sudo mysql -u root -p</code></pre>
+                <p class="fw-semibold">EJEMPLO DE BASE DE DATOS:</p>
+                <pre><code>
+                    CREATE DATABASE nombre_basedatos CHARACTER SET UTF8MB4;
+                    CREATE USER 'usuario_django'@'localhost' IDENTIFIED BY 'tu_password_segura';
+                    GRANT ALL PRIVILEGES ON nombre_basedatos.* TO 'usuario_django'@'localhost';
+                    FLUSH PRIVILEGES;
+                    EXIT;</code></pre>
+                <p class="fw-semibold"> Mostrar base de datos MariaDB:</p>
+                <pre><code>SHOW DATABASES;</code></pre>
+                <p class="fw-semibold">Borrar una base de datos:</p>
+                <pre><code>DROP DATABASE nombre_de_la_base;</code></pre>
+                <p class="fw-semibold">Salir</p>
+                <pre><code>EXIT;</code></pre>
+              </div>
+            </div>
+          </div>
+          <!-- Sección: Acceso a cuenta GitHub: -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingGitHub">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGitHub">
+                <i class="bi bi-terminal-fill me-2"></i>Acceso a cuenta GitHub:
+              </button>
+            </h2>
+            <div id="collapseGitHub" class="accordion-collapse collapse" data-bs-parent="#instructivoAccordion">
+              <div class="accordion-body">
+                <p class="fw-semibold">Hacerlo desde el usuario que gestiona tu sitio web (por ejemplo: /home/tu_usuario/htdocs)</p>
+                <pre><code>ssh-keygen -t ed25519 -C "tu_email"</code></pre>
+                <p class="fw-semibold">Mostrar tu clave pública para copiarla:</p>
+                <pre><code>cat ~/.ssh/id_ed25519.pub</code></pre>
+                <p class="fw-semibold">Agregar la clave pública a tu cuenta de GitHub:</p>
+                <pre><code>Iniciá sesión en GitHub en tu navegador > "https://github.com/"</code></pre>
+                <pre><code>Ir a Settings > SSH and GPG keys.</code></pre>
+                <pre><code>Hacé clic en "New SSH key".</code></pre>
+                <pre><code>Pegá la clave copiada y dale un nombre.</code></pre>
+                <p class="fw-semibold">Probar conexión desde el servidor:</p>
+                <pre><code>ssh -T git@github.com</code></pre>
+                <p class="fw-semibold">Escribir "yes", y generara este mensaje:</p>
+                <pre><code>"Hi "NOMBRE_USUARIO_GITHUB"! You've successfully authenticated, but GitHub does not provide shell access."</code></pre>
+                <p class="fw-semibold">Clonar tu repositorio Django desde GitHub:</p>
+                <pre><code>git clone https://github.com/tu_usuario/tu_repositorio.git</code></pre>
+                <p class="fw-semibold">Instalar dependencias del proyecto:</p>
+                <pre><code>cd tu_repositorio</code></pre>
+                <pre><code>pip install --upgrade pip</code></pre>
+                <pre><code>pip install -r requirements.txt</code></pre>
+              </div>
+            </div>
+          </div>
+          <!-- Sección: Configurar .env para conectarse a la base de datos: -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingenv">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseenv">
+                <i class="bi bi-terminal-fill me-2"></i>Configurar .env para conectarse a la base de datos:
+              </button>
+            </h2>
+            <div id="collapseenv" class="accordion-collapse collapse" data-bs-parent="#instructivoAccordion">
+              <div class="accordion-body">
+                <p class="fw-semibold">Archivo .env</p>
+                <pre><code>
+# Config Django:
+SECRET_KEY= CLAVE DE DJANGO	
+DEBUG=True
+ALLOWED_HOSTS= WEB, 127.0.0.1 (EJEMPLO: control.gestionargnea.com, 127.0.0.1 )
 
-    <h2>6. Crear base de datos y usuario para Django</h2>
-    <pre><code>sudo mysql -u root -p
+# Config data base:
+DB_NAME= NOMBRE_BD
+DB_USER= USUARIO_BD
+DB_PASSWORD= PASS_BD
+DB_HOST=localhost
+DB_PORT=3306
+                </code></pre>
+              </div>
+            </div>
+          </div>
+          <!-- Sección: Configurar settings.py para conectarse a la base de datos: -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingsettings">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsesettings">
+                <i class="bi bi-terminal-fill me-2"></i>Configurar settings.py para conectarse a la base de datos:
+              </button>
+            </h2>
+            <div id="collapsesettings" class="accordion-collapse collapse" data-bs-parent="#instructivoAccordion">
+              <div class="accordion-body">
+                <p class="fw-semibold">MODIFICAR/AGREGAR:</p>
+                <pre><code>
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'static'
+CSRF_TRUSTED_ORIGINS = ['https://control.gestionargnea.com',]
+                </code></pre>
+              </div>
+            </div>
+          </div>
+          <!-- Sección: Recopilar los archivos estáticos -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingcollectstatic">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsecollectstatic">
+                <i class="bi bi-terminal-fill me-2"></i>Recopilar los archivos estáticos:
+              </button>
+            </h2>
+            <div id="collapsecollectstatic" class="accordion-collapse collapse" data-bs-parent="#instructivoAccordion">
+              <div class="accordion-body">
+                <p class="fw-semibold">Copia todos los archivos estáticos (CSS, JS, imágenes, fuentes, etc.) de tu proyecto Django y sus apps al directorio definido en STATIC_ROOT.</p>
+                <span>ALERTA:</span>
+                <span>Previamente debe de estar configurado "settings.py".</span>
+                <span>Una vez configurado, se puede ejecutar el comando:</span>
+                <pre><code>python manage.py collectstatic</code></pre>
+              </div>
+            </div>
+          </div>
+          <!-- Sección: Abrir el archivo de configuración de Nginx -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingarchivoNginx">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsearchivoNginx">
+                <i class="bi bi-terminal-fill me-2"></i>Abrir el archivo de configuración de Nginx
+              </button>
+            </h2>
+            <div id="collapsearchivoNginx" class="accordion-collapse collapse" data-bs-parent="#instructivoAccordion">
+              <div class="accordion-body">
+                <p class="fw-semibold">Abre el archivo de configuración de Nginx para el dominio control.gestionargnea.com:</p>
+                <pre><code>sudo nano /etc/nginx/sites-available/control.gestionargnea.com.conf</code></pre>
+                <p class="fw-semibold">Agregar la configuración de archivos estáticos:</p>
+                <pre><code>
+# Redirección de HTTP a HTTPS (puerto 80)
+server {
+    listen 80;
+    listen [::]:80;
+    server_name control.gestionargnea.com;
 
--- EJEMPLO:
-CREATE DATABASE nombre_basedatos CHARACTER SET UTF8MB4;
-CREATE USER 'usuario_django'@'localhost' IDENTIFIED BY 'tu_password_segura';
-GRANT ALL PRIVILEGES ON nombre_basedatos.* TO 'usuario_django'@'localhost';
-FLUSH PRIVILEGES;
-EXIT;</code></pre>
+    # Redirigir todo el tráfico HTTP a HTTPS
+    return 301 https://$host$request_uri;
+}
 
-    <h2>7. Acceso a cuenta GitHub</h2>
-    <pre><code>cd /home/tu_usuario/htdocs
-ssh-keygen -t ed25519 -C "diego_escobar@live.com"
-cat ~/.ssh/id_ed25519.pub</code></pre>
-    <p>Agregar la clave pública a tu cuenta de GitHub:</p>
-    <ul>
-      <li>Iniciá sesión en GitHub</li>
-      <li>Ir a <strong>Settings &gt; SSH and GPG keys</strong></li>
-      <li>Hacé clic en <strong>New SSH key</strong></li>
-      <li>Pegá la clave copiada y dale un nombre</li>
-    </ul>
+# Bloque HTTPS (puerto 443)
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    server_name control.gestionargnea.com;
 
-    <h2>8. Probar conexión desde el servidor</h2>
-    <pre><code>ssh -T git@github.com</code></pre>
-    <p>Escribí "yes", y deberías ver:</p>
-    <pre><code>Hi escobardie! You've successfully authenticated, but GitHub does not provide shell access.</code></pre>
+    # Certificados SSL
+    ssl_certificate /etc/letsencrypt/live/control.gestionargnea.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/control.gestionargnea.com/privkey.pem;
 
-    <h2>9. Clonar tu repositorio Django desde GitHub</h2>
-    <pre><code>git clone https://github.com/tu_usuario/tu_repositorio.git
-cd tu_repositorio</code></pre>
+    # Configuración para servir archivos estáticos
+    location /static/ {
+        alias /home/gestionargnea-control/htdocs/control.gestionargnea.com/static/;
+    }
 
-    <h2>10. Instalar dependencias del proyecto</h2>
-    <pre><code>pip install --upgrade pip
-pip install -r requirements.txt</code></pre>
+    # Proxy a Gunicorn (que está escuchando en 127.0.0.1:8000)
+    location / {
+        proxy_pass http://127.0.0.1:8000/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
 
-    <h2>11. Configurar settings.py para conectarse a la base de datos</h2>
-    <pre><code>asd</code></pre>
-  </div>
+    # Otras configuraciones que puedas necesitar...
+}
+                </code></pre>                
+              </div>
+            </div>
+          </div>
+          <!-- Sección: Reiniciar Nginx para aplicar los cambios: -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingReiniciarNginx">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseReiniciarNginx">
+                <i class="bi bi-terminal-fill me-2"></i>Reiniciar Nginx para aplicar los cambios:
+              </button>
+            </h2>
+            <div id="collapseSReiniciarNginx" class="accordion-collapse collapse" data-bs-parent="#instructivoAccordion">
+              <div class="accordion-body">
+                <p class="fw-semibold">Reinicia el servicio de Nginx completamente, deteniendo y luego volviendo a iniciar el servicio:</p>
+                <pre><code>sudo systemctl restart nginx</code></pre>
+              </div>
+            </div>
+          </div>
+          <!-- Sección: Recargar Nginx después de realizar cambios: -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingRecargarNginx">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRecargarNginx">
+                <i class="bi bi-terminal-fill me-2"></i>Recargar Nginx después de realizar cambios:
+              </button>
+            </h2>
+            <div id="collapseRecargarNginx" class="accordion-collapse collapse" data-bs-parent="#instructivoAccordion">
+              <div class="accordion-body">
+                <p class="fw-semibold">Recarga la configuración de Nginx sin detener el servicio, lo que significa que aplica los cambios realizados en los archivos de configuración sin interrumpir las conexiones activas:</p>
+                <pre><code>sudo systemctl reload nginx</code></pre>
+              </div>
+            </div>
+          </div>
+          <!-- Sección: Verificar si Nginx está funcionando correctamente: -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingVerificarNginx">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseVerificarNginx">
+                <i class="bi bi-terminal-fill me-2"></i>Verificar si Nginx está funcionando correctamente:
+              </button>
+            </h2>
+            <div id="collapseVerificarNginx" class="accordion-collapse collapse" data-bs-parent="#instructivoAccordion">
+              <div class="accordion-body">
+                <p class="fw-semibold">Muestra el estado actual del servicio Nginx en tu servidor:</p>
+                <pre><code>sudo systemctl status nginx</code></pre>
+              </div>
+            </div>
+          </div>
+          <!-- Sección:  Migrar la base de datos y correr el servidor: -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingMigrar">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMigrar">
+                <i class="bi bi-terminal-fill me-2"></i> Migrar la base de datos y correr el servidor:
+              </button>
+            </h2>
+            <div id="collapseMigrar" class="accordion-collapse collapse" data-bs-parent="#instructivoAccordion">
+              <div class="accordion-body">
+                <p class="fw-semibold">Crea archivos de migración para reflejar los cambios realizados en los modelos (models.py) de tu proyecto Django:</p>
+                <pre><code>python manage.py makemigrations</code></pre>
+                <p class="fw-semibold">Aplica las migraciones pendientes a la base de datos:</p>
+                <pre><code>python manage.py migrate</code></pre>
+                <p class="fw-semibold">Crea un usuario administrador para acceder al panel de administración de Django (/admin) con todos los permisos.</p>
+                <pre><code>python manage.py createsuperuser</code></pre>
+                <p class="fw-semibold">Corre el servidor: (opcional)</p>
+                <pre><code>python manage.py runserver</code></pre>
+              </div>
+            </div>
+          </div>
+          <!-- Sección: Configuración SSL: -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingSSL">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSSL">
+                <i class="bi bi-terminal-fill me-2"></i>Configuración SSL:
+              </button>
+            </h2>
+            <div id="collapseSSL" class="accordion-collapse collapse" data-bs-parent="#instructivoAccordion">
+              <div class="accordion-body">
+                <p class="fw-semibold"> En Vhost editar: </p>
+                <pre><code>
+{{ssl_certificate_key}} > sl_certificate /etc/letsencrypt/live/control.gestionargnea.com/fullchain.pem;
+{{ssl_certificate}} > ssl_certificate_key /etc/letsencrypt/live/control.gestionargnea.com/privkey.pem;
+{{root}} > root /home/gestionargnea-control/htdocs/control.gestionargnea.com;
+
+{{nginx_access_log}} >  access_log /var/log/nginx/control_access.log;
+{{nginx_error_log}} > error_log /var/log/nginx/control_error.log;
+		
+{{settings}} > desde aca hasta abajo agregar / eliminar lo que este tambien:
+if ($scheme != "https") {
+        return 301 https://$host$request_uri;
+    }
+
+    location ~ /.well-known {
+        auth_basic off;
+        allow all;
+    }
+
+    include /etc/nginx/global_settings;
+
+    index index.html;
+
+    # RUTA PARA ARCHIVOS ESTÁTICOS
+    location /static/ {
+        alias /home/gestionargnea-control/htdocs/control.gestionargnea.com/static/;
+    }
+
+    location /uwsgi {
+        include uwsgi_params;
+        uwsgi_read_timeout 3600;
+        uwsgi_pass 127.0.0.1:8000;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:8000/;
+        proxy_http_version 1.1;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Server $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Host $host;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "Upgrade";
+        proxy_pass_request_headers on;
+        proxy_max_temp_file_size 0;
+        proxy_connect_timeout 900;
+        proxy_send_timeout 900;
+        proxy_read_timeout 900;
+        proxy_buffer_size 128k;
+        proxy_buffers 4 256k;
+        proxy_busy_buffers_size 256k;
+        proxy_temp_file_write_size 256k;
+    }
+
+    location ~* ^.+\.(css|js|jpg|jpeg|gif|png|ico|gz|svg|svgz|ttf|otf|woff|woff2|eot|mp4|ogg|ogv|webm|webp|zip|swf)$ {
+        add_header Access-Control-Allow-Origin "*";
+        add_header alt-svc 'h3=":443"; ma=86400';
+        expires max;
+        access_log on;
+    }
+
+    if (-f $request_filename) {
+        break;
+    }
+
+                </code></pre>
+              </div>
+            </div>
+          </div>
+          <!-- Sección: Ultimos controles: -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingcontroles">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsecontroles">
+                <i class="bi bi-terminal-fill me-2"></i>Ultimos controles:
+              </button>
+            </h2>
+            <div id="collapsecontroles" class="accordion-collapse collapse" data-bs-parent="#instructivoAccordion">
+              <div class="accordion-body">
+                <p class="fw-semibold">Permisos de archivos estáticos y media, Nginx:</p>
+                <pre><code>
+location /static/ {
+    alias /ruta/a/tu/proyecto/static/;
+}
+location /media/ {
+    alias /ruta/a/tu/proyecto/media/;
+}
+                </code></pre>
+                <p class="fw-semibold">Configuración ALLOWED_HOSTS en .env</p>
+                <pre><code>
+ALLOWED_HOSTS = ["control.gestionargnea.com", "127.0.0.1"]
+ALLOWED_HOSTS = control.gestionargnea.com, 127.0.0.1
+                </code></pre>
+              </div>
+            </div>
+          </div>
+          <!-- Sección: Extras -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingExtras">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExtras">
+                <i class="bi bi-terminal-fill me-2"></i>Extras
+              </button>
+            </h2>
+            <div id="collapseExtras" class="accordion-collapse collapse" data-bs-parent="#instructivoAccordion">
+              <div class="accordion-body">
+                <p class="fw-semibold">abrir archivo:</p>
+                <pre><code>nano settings.py</code></pre>
+                <p class="fw-semibold">instalar librería:</p>
+                <pre><code>pip install python-decouple</code></pre>
+                <p class="fw-semibold">reiniciar el servidor Ubuntu:</p>
+                <pre><code>sudo reboot</code></pre>
+                <p class="fw-semibold">collectstatic:</p>
+                <pre><code>python manage.py collectstatic</code></pre>
+              </div>
+            </div>
+          </div>
+
+
+        </div> <!-- /.accordion -->
+      </div>
+    </div> <!-- /.card -->
+  </div> <!-- /.container -->
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
